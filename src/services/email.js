@@ -1,15 +1,8 @@
-import nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 import jwt from 'jsonwebtoken'
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-})
+const resend = new Resend(process.env.RESEND_API_KEY)
+const FROM = process.env.EMAIL_FROM || 'MindzSpark Counseling <onboarding@resend.dev>'
 
 export function generateSetupToken(email, memberId) {
   return jwt.sign({ email, memberId }, process.env.JWT_SECRET, { expiresIn: '48h' })
@@ -22,8 +15,8 @@ export function verifySetupToken(token) {
 export async function sendSetupEmail(name, email, memberId, token) {
   const setupUrl = `${process.env.FRONTEND_URL}/setup-password?token=${token}`
 
-  await transporter.sendMail({
-    from: `"MindzSpark Counseling" <${process.env.EMAIL_FROM}>`,
+  await resend.emails.send({
+    from: FROM,
     to: email,
     subject: 'Set up your MindzSpark Portal password',
     html: `
@@ -46,8 +39,8 @@ export async function sendSetupEmail(name, email, memberId, token) {
 }
 
 export async function sendLoginOtpEmail(name, email, otp) {
-  await transporter.sendMail({
-    from: `"MindzSpark Counseling" <${process.env.EMAIL_FROM}>`,
+  await resend.emails.send({
+    from: FROM,
     to: email,
     subject: 'MindzSpark Portal - Login Verification Code',
     html: `
@@ -70,8 +63,8 @@ export async function sendLoginOtpEmail(name, email, otp) {
 }
 
 export async function sendPasswordResetEmail(name, email, otp) {
-  await transporter.sendMail({
-    from: `"MindzSpark Counseling" <${process.env.EMAIL_FROM}>`,
+  await resend.emails.send({
+    from: FROM,
     to: email,
     subject: 'MindzSpark Portal - Password Reset OTP',
     html: `
